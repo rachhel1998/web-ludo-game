@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- ==========================================================================\
+|
+|   To learn how to make your own language parser, please check the following
+|   link:
+|       https://npp-user-manual.org/docs/function-list/
+|
+\=========================================================================== -->
+<NotepadPlus>
+	<functionList>
+		<!-- ======================================================== [ Java ] -->
+
+		<!--
+		|   Based on:
+		|       https://notepad-plus-plus.org/community/topic/12691/function-list-with-java-problems
+		\-->
+		<parser
+			displayName="Java"
+			id         ="java_syntax"
+		>
+			<classRange
+				mainExpr    ="(?x)                                          # Utilize inline comments (see `RegEx - Pattern Modifiers`)
+						(?m)^[\t\x20]*                                      # leading whitespace
+						(?:
+							(?-i:
+								abstract
+							|	final
+							|	native
+							|	p(?:rivate|rotected|ublic)
+							|	s(?:tatic|trictfp|ynchronized)
+							|	transient
+							|	volatile
+							|	@[A-Za-z_]\w*                               # qualified identifier
+								(?:                                         # consecutive names...
+									\.                                      # ...are dot separated
+									[A-Za-z_]\w*
+								)*
+							)
+							\s+
+						)*
+						(?-i:class|enum|@?interface)
+						\s+
+						(?'DECLARATOR'
+							(?'VALID_ID'                                    # valid identifier, use as subroutine
+								\b(?!(?-i:
+									a(?:bstract|ssert)
+								|	b(?:oolean|reak|yte)
+								|	c(?:ase|atch|har|lass|on(?:st|tinue))
+								|	d(?:efault|o(?:uble)?)
+								|	e(?:lse|num|xtends)
+								|	f(?:inal(?:ly)?|loat|or)
+								|	goto
+								|	i(?:f|mp(?:lements|ort)|nstanceof|nt(?:erface)?)
+								|	long
+								|	n(?:ative|ew)
+								|	p(?:ackage|rivate|rotected|ublic)
+								|	return
+								|	s(?:hort|tatic|trictfp|uper|witch|ynchronized)
+								|	th(?:is|rows?)|tr(?:ansient|y)
+								|	vo(?:id|latile)
+								|	while
+								)\b)                                        # keywords, not to be used as identifier
+								[A-Za-z_]\w*                                # valid character combination for identifiers
+							)
+							(?:
+								\s*\x3C                                     # start-of-template indicator...
+								(?'GENERIC'                                 # ...match first generic, use as subroutine
+									\s*
+									(?:
+										(?&amp;DECLARATOR)                  # use named generic
+									|	\?                                  # or unknown
+									)
+									(?:                                     # optional type extension
+										\s+(?-i:extends|super)
+										\s+(?&amp;DECLARATOR)
+										(?:                                 # multiple bounds...
+											\s+\x26                         # ...are ampersand separated
+											\s+(?&amp;DECLARATOR)
+										)*
+									)?
+									(?:                                     # match consecutive generics objects...
+										\s*,                                # ...are comma separated
+										(?&amp;GENERIC)
+									)?
+								)
+								\s*\x3E                                     # end-of-template indicator
+							)?
+							(?:                                             # package and|or nested classes...
+								\.                                          # ...are dot separated
+								(?&amp;DECLARATOR)
+							)?
+						)
+						(?:                                                 # optional object extension
+							\s+(?-i:extends)
+							\s+(?&amp;DECLARATOR)
+							(?:                                             # consecutive objects...
+								\s*,                                        # ...are comma separated
+								\s*(?&amp;DECLARATOR)
+							)*
+						)?
+						(?:                                                 # optional object implementation
+							\s+(?-i:implements)
+							\s+(?&amp;DECLARATOR)
+							(?:                                             # consecutive objects...
+								\s*,                                        # ...are comma separated
+								\s*(?&amp;DECLARATOR)
+							)*
+						)?
+						\s*\{                                               # whatever, up till start-of-body indicator
+					"
+				openSymbole ="\{"
+				closeSymbole="\}"
+			>
+				<className>
+					<nameExpr expr="(?-i:class|enum|@?interface)\s+\K\w+(?:\s*\x3C.*?\x3E)?" />
+				</className>
+				<function
+					mainExpr="(?x)                                          # Utilize inline comments (see `RegEx - Pattern Modifiers`)
+							^[\t\x20]*                                      # leading whitespace
+							(?:
+								(?-i:
+									abstract
+								|	final
+								|	native
+								|	p(?:rivate|rotected|ublic)
+								|	s(?:tatic|trictfp|ynchronized)
+								|	transient
+								|	volatile
+								|	@[A-Za-z_]\w*                           # qualified identifier
+									(?:                                     # consecutive names...
+										\.                                  # ...are dot separated
+										[A-Za-z_]\w*
+									)*
+								)
+								\s+
+							)*
+							(?:
+								\s*\x3C                                     # start-of-template indicator
+								(?&amp;GENERIC)
+								\s*\x3E                                     # end-of-template indicator
+							)?
+							\s*
+							(?'DECLARATOR'
+								[A-Za-z_]\w*                                # (parent) type name
+								(?:                                         # consecutive sibling type names...
+									\.                                      # ...are dot separated
+									[A-Za-z_]\w*
+								)*
+								(?:
+									\s*\x3C                                 # start-of-template indicator
+									(?'GENERIC'                             # match first generic, use as subroutine
+										\s*
+										(?:
+											(?&amp;DECLARATOR)              # use named generic
+										|	\?                              # or unknown
+										)
+										(?:                                 # optional type extension
+											\s+(?-i:extends|super)
+											\s+(?&amp;DECLARATOR)
+											(?:                             # multiple bounds...
+												\s+\x26                     # ...are ampersand separated
+												\s+(?&amp;DECLARATOR)
+											)*
+										)?
+										(?:                                 # consecutive generics objects...
+											\s*,                            # ...are comma separated
+											(?&amp;GENERIC)
+										)?
+									)
+									\s*\x3E                                 # end-of-template indicator
+								)?
+								(?:                                         # package and|or nested classes...
+									\.                                      # ...are dot separated
+									(?&amp;DECLARATOR)
+								)?
+								(?:                                         # optional compound type...
+									\s*\[                                   # ...start-of-compound indicator
+									\s*\]                                   # ...end-of-compound indicator
+								)*
+							)
+							\s+
+							(?'VALID_ID'                                    # valid identifier, use as subroutine
+								\b(?!(?-i:
+									a(?:bstract|ssert)
+								|	b(?:oolean|reak|yte)
+								|	c(?:ase|atch|har|lass|on(?:st|tinue))
+								|	d(?:efault|o(?:uble)?)
+								|	e(?:lse|num|xtends)
+								|	f(?:inal(?:ly)?|loat|or)
+								|	goto
+								|	i(?:f|mp(?:lements|ort)|nstanceof|nt(?:erface)?)
+								|	long
+								|	n(?:ative|ew)
+								|	p(?:ackage|rivate|rotected|ublic)
+								|	return
+								|	s(?:hort|tatic|trictfp|uper|witch|ynchronized)
+								|	th(?:is|rows?)|tr(?:ansient|y)
+								|	vo(?:id|latile)
+								|	while
+								)\b)                                        # keywords, not to be used as identifier
+								[A-Za-z_]\w*                                # valid character combination for identifiers
+							)
+							\s*\(                                           # start-of-parameters indicator
+							(?'PARAMETER'                                   # match first parameter, use as subroutine
+								\s*(?-i:final\s+)?
+								(?&amp;DECLARATOR)
+								\s+(?&amp;VALID_ID)                         # parameter name
+								(?:                                         # consecutive parameters...
+									\s*,                                    # ...are comma separated
+									(?&amp;PARAMETER)
+								)?
+							)?
+							\)                                              # end-of-parameters indicator
+							(?:                                             # optional exceptions
+								\s*(?-i:throws)
+								\s+(?&amp;VALID_ID)                         # first exception name
+								(?:                                         # consecutive exception names...
+									\s*,                                    # ...are comma separated
+									\s*(?&amp;VALID_ID)
+								)*
+							)?
+							[^{;]*\{                                        # start-of-function-body indicator
+						"
+				>
+					<functionName>
+						<funcNameExpr expr="\w+(?=\s*\()" />
+					</functionName>
+				</function>
+			</classRange>
+		</parser>
+	</functionList>
+</NotepadPlus>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             %hÞfˆ$§~*'chKŠ2:¡vwPþ9ŽS¡ºªHéeNÏã¨¿—‡äl^£OAÄfÎ_L¥j²ÏêÆˆvÊÊÀ>Nc<Ð1Î•…©U1¥<“ædÄÔS2ã“zªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªª€  ‚›.•<eA•³‘BÄ‚W«Èô‰ˆ:‡…«®/Õ¬^ã§*Ü^v¾X«ï–9mÙP›•(,LÎ<³	jÂeŠè|êØŸ=9X†ýÞJpºîŸ×ú§kÁ\–|dHP”#B†#zâÄU·QrôfÉÏw'þñfË.fÆ
+<fÿû’dùŒô”?MXbò     4meëÀ  4€  f"Àc1i2 D‚‘šAß³™ÐÙ¡« Ð4ÄKtÍò‘¥Ì1`ÜÌÜèÄŠÆ[’ˆÌÀÂI$H‰æÃæ–ãœ˜&(®foFe4AˆØ*”8¤¢'f,š¬äïFP‚[Âÿ‚	]É¤ÎKº‘xIÅ;j½,–_:•(†"âý•ÙÔ†Ÿéõ{õÑ!HŸJdQ’œ/D9ÄICFiá7B[{œgµ9ZœÊ¬ÛÁ¦}ã%15Ì¸äÞªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªª!·hHŒA„H P¶Š®:,dü2HçÅå/B0Â4€¡õº2*kmaÐL[Œáe!)Ç‚×2w*Ö_F‚°©öÝ$É~&Fý¾0ú¿DF‚pftHR]	xJP&`ž‚9@¹.Äd‘umÊèxårËÄÙS‚fÿû’dÿ„óÍBRÑ/b6     &åôÀ  4€  tPy9Ùýß—®|ÎÝ¿¥ï3Í°²Ì,ñP!¢2`¶Fa„rYàºóH´à¿6Œ‡«€&Æ1yØV×‡@›[ãvJª)p1‘jH½ OhÁoÙMø³¬á2BSfë4 Š"µ¨ê4``k‘I êØf9VB±„ÏQ¦•]=Q‡Ÿ'uÀ‡ÔÊv2Ü© È¬z»ý;#ÄÏ0¾r%%±% È„d%œ ‡¡ÊI"ÛšM–¿Ùƒ«¡jo]9>ëø˜‚šŠf\roUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU€ äÀ[ŠÀ¹A kˆse³z$Û¸&G8¾ZsKc(oí</cuŸI·ä$m0d3 Ð” 0b™—š¹6kÃ˜wQïµ+XRbVG9*…·_¥Rœk)Ô³Ðb§ }hå)Ô˜l5jc˜M®±©˜)¯ñÒˆAr¸ÿû’dÿôBÊ‹Xbò     © e‘€  4€  ’ Õ	sè€aÓ&4BÃÉ™¦Þ*ÖOƒ Â¤?VDCZ£ÒhÉˆ}@Æ`
+{ØÀC fÊÊß3…Œ­ÅÉTÉVÈ K
+”p´²~WB€£j|ÀtüÊÓ½–¢r—™‡>IY-¤‹¹‘4y†.Æí;×t¥05ÉUtN•èÙÉòÿ×Z7ÅÉË…óÐ:ÌFÌí•ä$ÒÇãcØèšC€Í5ÉX®9-Ï£ÿêLAME3.97UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU Ü ‚!ö^Ý€<Ghw"ˆ¦Ò:(L'€±p„(pÆ‡ˆ„k‚;ÇÖúE…ˆ–1-‰B2¤¨ÉªEBˆu6Ô((yÑ‚NìN­$rDÉ€ þ*e•e¬ˆÖÍ÷D71M!VÛÈÔÊiåõL ŒŽVƒÿû’dÿ„ô:DL;	e     -aÀ  4€  *>Á8Ndç6§hEþ1635;(!z˜”.rbJL°yfºŠÊ¹ô™ÄéÄÀåSPæ›¤ÐÑÂVT"äHÁ€! ÛBÄh*Î"Ü'„€0âô!Ÿ&±Ê&íV)Â6$†Ô.-„¼T¶©Œª«LÎ¾ùTŒZk;Ñç#öi2¡0°y¯4OO…òº±­†™\;›ƒBð~ó‡BQðò¼p3LÁiå}e˜!c£dQÿBb
+j)™qÉºªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªªª ›‡4DîOÆdÄÚ0ÑŠòÂ<C‰F"çxŸBÒ8]4¬Øå?Ne"õay8¼’,¨,¬–ÆBB&¬TSg&fµb2ú
+ÔÅc ¡³Øjºž`Ýz85IÊ$ÊN˜4`ÝzÆi'æn½°!•ŽuMK4³KI)•T¦Åÿû’dÿŒóØDJ™ìK      Õ,½—   4€  ¬<{6'uTq` °X¤·"¾)†&k¢k…U"pàUÀãžÔÌgªÀH0rìu‹ÖÊr„¿EÞg‹Aa§Va[KÁ¦¾ŽÂ€¸ÕjhKX‹Z‹¡·ê¬®Ü¥+½fTO[Ž²Üf…/†Pä]Å’jÓd|„C,EWnÙ“d*¥ý:[>[|àk3¨ô'ŽT¶ÀŠ€ñàƒç×(¡„’óì¬±ÓŽùùœ¿iîqÉä‡†—öL& ¦¢™—›ÕUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU  „\–ò`9EÃT±#ÍƒñYlñQE‡‘¬žÂåñª±û' .Æd8§eh÷Bö¨½ÑØx)ù:¤ŒGl'BÅiÙË(f+ÖQ½^™K$ÓU…r¥®Ýš¥ˆËÒ¾~~êÊ¦Kè?QI5œˆêæ¡ž[;,àö¬ø@ÿû’dÿŒôSDIað     ™CL°|À  4€  ;pgSèJÝ‰@Ð”¼=!$ø¹Œó­°ƒ’Hè”r˜¤e;›ÛÌä‰ÞD©˜ÉÒÉ’œ2ŽR2PLt% D\DX¨”>#¸<©>p6<Ü¡(´OP>c_U®å”Ž™ÖïJÛ¦Ê¯NÉƒk
+u99lªT`ÝÕE#‡J‘kfZbtdZ?Ú šƒ2¬ Ýqè59|t›[i^„Û}éÜ×(ñ”ÄÔS2ã“uUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU D*Dº—$Î#¡V"„#ymS¼¶Ébéž²)C©œµJËõNÚ+qN&ˆ)É^‡y¸»/HaÔ´çþ.ˆrÑÜu'‹ÐÊH¶á×sÊ8¦b¸úlbê§,CïV–zÑ!«%Q|¬¨Ò«¢…MŸëv&LÖ°¨¼—é‡cÃÿû’dÿ€ôWCÊQø`     u''¥”   4€  æÔÀtW†¡ø²%¼[Vrq’^ÓZÕû¸ŸÿýFÌ@ˆs£0 ãÏŽ<XYH(°\>[ƒ,Fè®j¢ÂJ¥zs
+‚^hº—/Dã˜Œqu¾Ž£*µx0Ib±/&Ž‰¥Ò¡IªÄšj5µƒm'å³®›ÿYs>“°"9‰ËWÛ
+‚ZBúƒEoT2Ùx`aÐ¦£â!áýÃÃŽTž‡*ß/D;Ÿ©™cY‰‘.†(Â(øJ/'ÜéÒ©q¥/aÚy½Dòöw=ßÿôåM|Zîw­´ÄÔS2ã“uUUUUUUUUUUUUUUUUUUUUUU	›<!ºv$@XÔÆ ºº„‚m2Ì@ˆMÄx !æS»
+™d+ùC›Æ§Ÿ5Æ˜ª¥ÀÀ€T:Õ±'5‰SfM-¾þ»ìíª‘@”3€”È{ž??[S˜DkãÁ‰øˆKCÎ*Òá0C{cÂùZ~$Îÿû’dÿŽôëDÆdÀ     E,±üˆ  4€  –Ÿ\UN¦lB…w(Õ½¢!U4œÒ²FÐQ„oWvsuÌ¾ìÝéZ'L¿ý×,„Ò¯$®…ì N®âÔ\`¹œg ¨ì((‰l8ÔˆPõæÞ·zíM4¨KõòœˆFâCÓ,J4Ü©¨UË'”»nZ´µôÆUðâ±-ºHœpxGò¹®-QQ0Å´ÑHêñÉtÅ@ùëP:èž°†…	m+BœøÄâIIÌŸ²K*’ŒPÑN“ç™9ªVÅíŒM£|Þ8ÈR!-©@˜°¾°ñŠÌ·ÈÅ.Ó»§ZÓSQLËŽMÕUUUUUUUUUUUUU$a0€Ê¥¨òHlÁTJ: ·EJ±Æ@‡Ìy9„ŒËl({~’é8aÁäé{K„³Ýé8€˜­¦¸™EßI5L›-¢ü	N!i2rQÐ’‚¤ŒN”M”ôsº¥ƒÐù%|¦PVUJÅ+³&®j¾¥ÊÇ¤Z#ÿû’dÿŒõ·QD‹,À     -L1úÀ  4€  )§céakž‡u&Eñ!±ñtu-Ú¶G;		¢H¤íb…DÜiìÄ½‰¥›Z}ìGaµ6Ó³qæÀ"t_×ê•ÄB FƒQb‚€Î¸$Ø’ãã‚ZÝaô(EQ¬xÅäPÔ·EFŽÂLVòÙ¥Å"˜Y£…#]Qˆû37}3ÛÔ$7e+à ŒBv+%9ÕJ‰\‹?™lª:#¹˜§íš®Õð•«—éÙ™Õ±.…Dbh©D±®×êÆÌù Ãz,'rPöYW*¶ž²:,ûd‚é p£S‘9Ÿ×#„Óx¯ZÄPâíí÷ûvþBWÌ÷z³÷ûçwS:ÔëRí „"*†sE¤aw€”Z8Ž°BñL@°’#ÂºàSŒÂm:È”H"û¤ð¨R;¼Ì¶ŒºJ^\äp|T­Ürí<êjú¢4¹\GÛ²pœ
+Å;æÅåÜEBFEÊ„ìk?”¬MŠxª%²xùa<¢?Äÿû’dÿŒöDCƒXbò     q,áéÈ  4€  ùBé½Põ2`@C*5r¥rÍgr~
+MaiÁ"Þ}¬ŸèÇeZB†Ú98‡qV.Ä);fT¾|<×[Ùb®ÞWýÖ,ö+Òß§aag8eô¿†ÁF¼Œ†Ô€« ¡U@HÒ!fšX…ô†CIzUb*!±C‰JäÅ0³”˜c€H¤$P i`# ”(Â:É@FÓ!Jâè>‹»bÂppÃT›¯–gFDa£9‘3åt8)Öž³¨N…Ê²tû;Izzc—5;cyÒì”Xu÷“Cg;VÓ“ru·eÑ ü]À%oJÄ4ÈOT¼¨2w,#ÏÔ@AÑ¥ñŒÓóãîøzH2ŒeA‘¬*Tà8rM»jT>uQÐY´½£AÁ‚J¥ÀLRR¡ãT–kÆ%áƒ48Îƒ:a‚pêj%Qò&—ª¬±K¹$BUÅe‡×{Ò:AbÓ5ÌÍPNÒeÌóH¯–ª8™Å½æö^g]©›Žÿû’dûŒögC/Â     Õ!LáêÀ  4€  V&#Év†·«£6Ä›èjÆ(¢Ñ–	X:µ}rùHŽr0ËåXÚÚKéŠàäXphlaD²—ÄÓc^›cžÊ–B0iiEkŸ¶dùÍLÑÉóK¹šÎÆ\½íá‘;n-N‚sOû¨w&C@ @c2ÀÂrihì(B<J–¨PuƒZ «†V…£ús¦ƒ€‡wmÍ—¥IŠNEÞ*¶bÍc¹Þ†¡mˆzrP”—Ï48D&Š…"lO‡ÞfáÚ5R¼Ñ2\[}i¦?°þdÇÈ,‹.WŒ˜8=]©xÀì¶)ã²1Ùò
+âéb©†ËR
+TUNµyÂ­MÇNÆÜ=ã6ž÷Y×vð<ceOjÖ‹"êå}šPHHCc¯—.U#‰²x)ÐlÂ*:Kt.’C'[$Q,mYÚ@GÃ[–3·‘ˆ»ÏÛŽìº[q^ªîÉ*£VÙ
+ë…\}^µÐ'JåàlEó`2¤ÕÁÈøÞBÿû’dóöƒ[BƒOR     õ!L±ù  4€  ’â|²'VKª	¯,œ¼àî9“¹AL–¥±­lÔÙDˆ“rq¡`Š”ªœEá ÒxU «@
+u!b×¬Sû˜Ìä´M
+[Ç™ÎîÕšögt+,Û¿k¶¹ªŒ@½38ÎFqá­ø4t­T&
+ÒÁB†,1„7Rª@—¬¾í	öyÙ“^‚ÕêÉ¤§A*Ó”L&ú}TñLŠ1ÉÉ+'ª±#ÑUNÀQ5':½LË·ïÜà—tŠo-äÑ‘T+S§ùúžOªœ’X1¾u•ksMŒ´ñŒ $ÑWLiUC9˜dš)Í&÷’Äi6:D‹cÄÒ½+*½3>5mØYÚ¤‘ö!ÑÉ‚#œÆ&d=³·ê&"R¡5ËÌƒ(	Ò*T ™`†-`Q‚å1*PAB#Â€‚Å]Uƒ(Ù%ÑbCk"<à~tžÑ'kK£âä²Ä7	æ‡ñ2r¹U‹?..PjÑáúz]Å‰ÿû’dîõêgÃ³À     ­
+-<uÈ  4€  ¨$ÙQJÐ’FåcÒÙõŒèšÐôÂÄ´)4ññ½‡Ã’ù	’ùÀ~`UEÅÕÌNRÉªJ#‡é1ãKïV¶g{Q×t]ë¶}HOø‚ymmC˜ÙÍÚ‹¦É73‚VÑÀ”ÎR²Ü˜ r3".@pªµümx 9{¯eŒ,­vÖ|TK`æ4-PFWæBMXŠ“™¹±mâ¡X©‡2‡LmóÂC"«¢ª}Y\LÉØ(QÔ†¤ß°^*fK
+	¨”±«íÈÓLèe|hæùo6‰&­§òÌÚ¹Á†ëçy=Œ]phÁNIõaºl²(‘íó+iW4‰•	 LÂ•«Í•ÃšED…Vnt£#d4[ŠLt„aPøÕUrOHÓL8-Aƒ¯5ÕŽ¦IB5‚dR\2 á™E)}7}çkQk‡RU4®3ìœUGbPªU1“«è¥µÌDâÓi¨b©‘çN—¤FBH¶=ÿû’dçŒõtHC“c¢     £¼uÈ  4€  Û,cS%b@BÖàµkj”ê=ÙYÕ4T¥P1'Ð„ÁÔÌ‹C”oÙ‰Ó”$Üˆ¢j¬fŽàmÂBKG˜kµ!‚=óêb”Þ!k\KAjŽ|5ÿhÏ¶Ø­wÊ¶ul3NÅà"Ò¿O×­N‡¼ÿ"µJbÇàFÈË„ ³ÔŸÀ×Ëþ£ÌÙ$Q±½UIvcüx &í,%–ÚÓáYS‚)´Ó—i‰Â©.Æœž#Ì&åƒÛ’-8¥"ÇŒY`tXÛ‹”'qÎ“@Ð’Z’BõäyÜ‡eó3²Á-yÁzÐ¨¶‘ÒrÄ&™tJôzÉ‰tügÚé± Ôä[S­+½2N ×dûî¤âºQLD«**GÊàòLKc“[½tþ¨µ0ÏÎÑ`ôgM±xÔ¹@Uµ‘´Ø4!FèÑšÔµ|»¼B,ï·Žœ1›v%CŠ£rÁ\ÜP~pœ†´p°”Ž—«XlJ.ÇÃGŽJ‚))ù×R2ùd¾„Wÿû’dêŽö<lÂ/5p     a¯
+°uÀ  4€  x™†¶UŒKh„±¥è@I W¤2aThêÐGA¥)Ÿ—Ÿ©h–âôçcèfhB
+¨ë¼ÙêPk7åÕs¢Œ¨à@Fâ¸y“†
+q: ¨j®¯ aK vA,˜÷a0£€‡7X)EÔ!ú`Ù¥—&ÇšÌÎÙM2PáÈßŽÏRÉ©Ü\`"•Jô«Ö¶õzuI32}ŒÞš
+ƒkÙQË;cÆç¨ÅÌ3§ò"ÙWHs):K3Epe*¦ofUjujä¿JùJúÆ/qYØXÎhÉC[«¦¶£É¨øK$P¤<á4jt¸ëG¹+§¬eã[ÇûÄtúzìÎxks&|—½¯¡·ÖS§}Ñ[Ô×›”«;÷Þë)Ÿ–y…W\E  *<$„Èˆ¸Íu:_)ÂÜ»Ãnœ¾M×¢'^Ä2òÛœ¤€lÃÄ ˜PD%'0ÔAD‡ƒL
+Ï,d,Uvæ ‚…"…šè,lòÁ«Pÿû’dìö1jÁ‹,r     …©,¼ÕÀ  4€  øtUÇ‹-3±<Øxyˆyq(~AFÎF|á ØF™Ãjƒ¬\T3a$%90ü¥™Øe®êmª¿3;ƒk‘hÜ»²ná’*©&ÇI¢F¥(NÈ:AIi_œÍ¾W2 õwSÜ‰ÅK/hq•­ ¿.”=Of‡¡×©ù—5Sÿ*2hø¨¥‘&«G¨SoFùŠ„Ff„²iÄ1ŠW:
+ˆ“6´Æ_{'\ªš”/™Ïø«3#Ù—ÙØ`¢\ÏuR"¨VNÝ.ã52‡ûC™”Ï˜,†üÜÁcáPñ>’4£†"€Û4£øæÎró0j=(ìÈ+LR¼"54Þ+†hb˜ÉÒÁeßb®Q4Rr<ö_j h½è“vfE.Oõ¡ÀK5ÃKÅ*dnÄ;·v’ñ¸±KqWâ†¢yHE§,&ªÜ9H!˜-=NZ`@5Ud¦¯/½ø®pù›£ñ’Sk!+8&ýóñŒ1Ôqÿû’dåˆõDjÂ‹	r     ­	,¼uÈ  4€  -•ÍÂ´DQÀàdf4Jâ3ì‡€h„QÄO)@:Œ(Í}\?	‹°z#zõ¦²êÆ¬Ò.ÅR2Ç]¦¦=b ÃPàHûf*Xì«‚ìÓÞ–UQÉÄÂÐU˜Ÿ¤Ï›„‰¦îDØ¾°ß‚G†˜’G!0søúäÿj7F$ÚŠÖøÅ3oŒóèîOãÝµpÊÒß˜Ôq´§„š<ŸY6õ¥}e‘\ÞÃ–$ú^Wcæ¥TFÇ'æbbVh¤jŸRôDA×I…\fdûJ}V ?ØŒdò‡6×J»J¶CæYº½®Ï‹Eƒu¬™ŸÓS¾q¤Ívi¾§£Ó½Ž…g¦äi5ÃéhÑT[%RmFl[’Ò¹9îáqE : #§yÃö*2ŸåtíÃì	ÀlÍÑÿ­ŽÂã­-É‡?O<Ó…Ê‹SºG"ÊùL­©¬989ÅpWD|ÑB†»Ê±ôzr»H°¦¬+Œhæó‹bÿû’dí‰ökA+,5r     Õ³¬¼ÕÀ  4€  ¾
+´ŸÅs‚øæB×2²ECNE…ÌWLÎè¨N«YÔ§)ÝJÎØV?dW©ØÏô­ûÖ—ôÝc˜è¬–Ämeóbêö²
+mj%Á­žuÕbPÉÅF¿"RPÂ `|í-éÌvñ™)h<”²	¨H¦ÀÐuE(mUUJÕ#¹bPôÕƒ·å’T…:QXUx~•FœŠ7¾±‘ûÏómœ`¡G´ÉØMì$~ý•0Û–¥s•ˆ¹sèŠ¸ÛC
+¼ËD$©.ž¦³“q”þ®isTiÖRÌ$:
+’c¡vÀ¾ÆªBÑÛ?YêøŒFCõGŽ/ˆ¦†W=2Â™–ú¾õ%ü¤‹¤æóÇÏfIý‹2w²”³i­;9úÙA3
+OO˜éí%²Ðæ‘Õª=‡¨jÀÕ•úWLí‡ÙŸo&íH£—áùlNTø?QÜ5Äå±ê‹Ùû½hÎG$¡ù	ŸXó.-3mÒ¬/">9XYTÒÇZJ¸ÝáI ÖoCŠÅÿû’dëökA+5r     «-<ÕÀ  4€  âû¤$üÉCw'—ÃÑ€æ:œŸjb¨Zèœnì\¨¬¼ñ¢hì[1yxö¹³ãüŠ©UÊõ+ªZ,Ïþ›¥Ì¡ŠgKJs¨T<nÅ JJ¬$‹†bPÒiîƒš|%A11hq H&TêÐt0ò0XäeÊ¥‘H2 …Kã4š‡#ñ¥•C2‚Ñ¶®týrÔ£‘UdEö—=S¥-/Dç7‹l‡xTBztfeH×$$Õþ2m£ƒÃÔL¥"¯q™%œ<£«Ê„£ø@\X[$nsê?¸-O%Ë¡pÐüÅö¢¤}÷´¯nÐ•(„°*†:ÁUE…Q é‹!Ñ˜^dŽ`ª (è P&'BF$¬€Þ$ù¸	<…R‡q;7ÏáÜØ‰(“Âr‹¥cÓÒ°~ChŒBhZr„H- S&­ÑqúÕÖŽV–à.iwÉDÇQHš¡•.¯!Å£¯Eãâá=X¬˜bBH'Ž#¶ÿû’dè	õ¶gÁ5r     ¡³¬0uÀ  4€  ËG
+ˆJ˜DxRužÅðR€/R"V£„ãˆ
+|%Œ|ò©ö(ÑPá¾8¬KêòˆÜ~‰V1uÙO>Ë·‰[‹[Wu,yù{oyÅÏ™ßV\´Ò+2qe=‡Õ&«×/ä™ÍC.Hü:ð-ÇmÚb-üq§Ãóxÿ±…,ÃõbòÝÔ1#‹gé#BNrqôg-–”¨mdC¶àÄÏ„©Í¢:@UåRàààþ:ßp|-¥(­HuõiOHç+üIx¥rIh=01"˜J®çˆŒ–—Ð¶“Ça9Åˆ¨K"äˆaÁ‘OSD¶4µì‚zN"ýL,´QM7H(ÑdcM:K³°£<Á&K=F¥¢VL¬ŠÊ?O–òÈª fªD°=$=~ãÌp$v&ªËã2©¸f¥HÆnõG"Œ×þµ(Ï¼G/“S§0?Ç²Õí!‚ˆ&ª‰ñ‰'…T„P®3¨Ù%6”	Ic5«åíá,&ÿûdñö!l@/a°     ± 0ÕÈ  4€  soŠÍÄO}"þjœ0r£$Ç¬4pˆ¸ÕY& IÔBoÌ—¾Ê…Çn14óÝgv„AJ¦†c”d'ÌC†Ø(…cUÑ"›0›ƒFp6ž Pç  4 ”@ÊÀî´Ö,Ê­¸Ý·.–Ž8ðüZ€î¸Ô6ÛÈiÅ† Š$ôâ2 ¦:™:t+\6º-‹dªµÁ­©ž;nUYsQ«Ÿ·²±®+*±ÅµÊN–8˜XuäsQEMímJÝüÙ©ß25JêCý¤x„'ªDB!V¦RFGÉ2à›+‘jU|El§ôVÊª8 Â*qvXNEW-gf$HeŒÛöË*âR&Ô‹5olîH£:Œá9¤É+2Š&š­DÚÄ-™Z*ÈgÎ2çII7ªºTìÀŒõ°T€'I‹+kU™‘ÎO££›Ð×ÊÂí3›r3tŒýÍU´RJgj±ò¥{­žRœdJôêË2
+R±cËG&mO	1¸µqÿû’díõˆfÁËr     ù²þŒ=5Ð  4€  ^kKÆÅõ‡ÌÇ„Ì/)YŽLU8HjDš3ºù<ÍAsSÆäzô¾SL_8ƒrë¨ˆ÷{'êpÑôíµ½È9ºÁÎºÅqdxÂ–#Zz¹aâ‡î‰d>sDÛXßrr‘WÍêò˜žr‘°ÁU±À6Ç^LÁŸV/%5xö! ¢©)u’Ñ©ÁÂaìKš,…4'B¤qkÆ¤ j‚€<±ÆFÄ}(#`Œò£L¢èf}fˆšdLauKˆ
+<‚@‘–”aåŒrPÀºû IÅ™X»W$k„‚°p}Š¯Tyqº
+&‡QÁ(´a
+4fIõ¡ŽtÑÁ“È&¬Õ@®¾"|^Sat°¦Ûq´ÓR'¢­¬ÆGœiHù1tà­4Œ0èHå‚AæIˆy¶aéã2i‘jBJÊÍ	¤¹¥	3wá.ª''C8Pér‹ÈglÚ\zr†ål–3/r	¡ôdè›žlÈõH€rl:ÿû’dë‰ö$l@+cr     ± ¬1+ˆ  4€  ‰.If¯˜>†+£g­.TE‰&&Ã´žƒ@ä–N)rŠÎ,TŽãÒ“†ÖkhïSWW;êFTdGªúÍß®ÞŽ8¦í$+B‹œq….Y|z‹ãa×©fXœ‡ÙÅö\z×`h‰5ÙËe\h€àäÙ‹Ì<lN"N“¶\ã"§‹H|˜L$$DD˜ ÂãbFŠ‚€dŒ€€©¡”R"¨‰TÈ0*ÈQ.}©ƒÀ¡d¼ˆ	Ë7ƒÖPU!†Ë "@`@m6xT"D›Cáà`Ùƒ)Z¨i}‹J"‹TªzòHSs|ÅïÁ~ç ‚§³C,£tªÉªé‘G[blJÍÃ'¸!N£Jœ²5)u>GŠhK•¤¹Ë±¡F™l?%~&æ ‡^Aj§kòÇ×2 }cJ.–Éì‹Ôˆ¸\ê PÄ˜FX¢¬lNyÂcJš/P¤Ý°¨ŽJ+©VÒ‘>Ä‹®z(O—žQ–tNAÿû’dì	öm?ƒ/`      µ± ¬1%H  4€  SÑIH3L`€h†‡E$ÃCsÈcò1àù’q˜
+*&8	¡z'YÌ£q2m–:Ü ±¬.·<ØgMrv‡±6åh”Ã„²eHœ„FY´%ŒÈ‘bPÙÕZàÙftô…9Å,¡¿‡ßB1²&ÃCá&[˜ËaÁ:70"0JñÆþµ—+Q¦}…â9%Â’­¼ñN[HHq«‰ÄŒ›¶P—[y}Ç²ByFf FP¤K‹Òˆo²±,I„‰ª¾6„õÉ$Ò™òE¸~#®0‰GÎ¶¤è²ÖFê·ON ¬Sö?Jµù˜ŽR,fÄÐ!^caaqÜ×ZzÉ_erƒë—žßoÓýVSuµ¹w"HÛ‚U¡†`–I…´HÃ1|'=b”¤b©.ðµèFKDtf ¨ˆÈwTŠ6ØL`LOAy<B,ÏN”°'Œ˜*ÜÛ£9¡”>_A_:Mhüºð„‘y™M ,OLx©ÿû’dðö>m?,Lð     °þ%‡È  4€  1-‚˜Õë#ÝZ¾Ô%Xé#tQÃIØš¼uÑ(^T/Ú][X”ëœü~­ùiy5ƒÃ†×™™¸T+°Ê«(/m‹hNâH„|Ã×s‹NNuf,sqyúÓ7‰ú°±R÷ÄèVvÇè²ä˜apÛÎÒif(bÎÔèç˜e¨ @6ª1õ	tu–$7“U!&Îé±sB’0Ñ|Ô(ÉÂK…GÃ‘ÅòjÛ8|¯jÚñâ×‰ÅVˆ%Yu,¢¯ëŠcB¢áô`hJ$‡Î/Ì:„„%´ÐGNGÁ(d¨Ü¤¹5$Ís©Î"LüP<<AÂîîMËNuIèø˜ó‡ÿ¨^~’»CãŒC	B,-ÖJ˜—–/JzþBwøËækÕ ïëà IwÞ	+Ó§†-ÒMKãWãt±<å19t³]¥î“	žÁ8ñXD±1©•Xh
+3ñˆ½âT	™ ðÑ]R‚bÉì&¨t„B¢#0ÄÓ|V%!]’ÿû’dîöl¿/`      Ý²ú%À  4€  ÐYê#2ÐX€>)¤,ˆ›M¶…zïFÊ8šµ´¥b<q¬ÍÔ•ì!©ªR|"£ÉŠG”‰TÃ	ÈÇFá¢ó„«òÙ" !*<ÞZ§ÆWRÕÎsV¯ÒSn†WV¾•ž¼Olxä	Ž	â¡ÄÝ` ¨¨$¨ucdò	­a<6*ªÕÆfpY<<uF7b“—¡HåþVDÁ:†ì-o/´2 ®+På	§ùãfØWŒüNxd‘Bƒ¢Ý$™´¦ì”shd›a¦ÊÚJŒí¤NŠ™še $:Ráž„LAME3.97UUUUUU@–<ôR•pèi[ãn{ ¦†ØœUÕvÛx´‚¤	™;ä1_šj&1¡©Á^OÓ’ªV¸L‹ˆÏ™ÊÄ!o.P–»GCØÛØeYrV(NxÓ6²
+¥LeÃÅÙlHAI#ýñ¦¤,ÅËC˜Ò|ÈÓØ¦1Ïu¶¢4ÿû’dìõ)lAË	ò     }³L0sÀ  4€  ©QÆòÐö)òãƒYtÁLOÏÏcÁ4šwC•BðÐ’|lj¨ì‡wJY\²44ÆÈDµ‚ÿ2„”„±ytéPÿ¶–Á	‘ó'1•[2qZ×…ç4XBqËGåbòëE‡'±MMòÀph[{iÏ“ìÄSSÉãLâ¯ª1!³6G¢”[9ahAŽ†+b]zË†‹ø>ž«mu?cÒ¦‡ØmtX|’°ÁZ"y…a¼ D²`<B§7Õ¦Ë¡Yëço–\F¹€mIyY@jIeª'xÉSê¢sDÞò7~ú¾êS]S½Ô‹óÑKPŸ+5¬WY%W.ÒK)±ãa³Ã•°8Åj¹ÇÐ–”°âŠÜd§ @ ’0Ÿ?Ë£¼áºH*¢h›ê'l††Î’Äd¡Òu‘¬…bƒ5©’°™uÉ[sËQkŠ¬ô//õçE”•¥T1/k×äò¸æd•Í|Ù#ÔÊLŸ% Æ‡“¢­ÏRÿû’dÿ÷#l½‹/dð     m´ü=‚   4€  ' ŒG$2âø$ñõµðãc¶”	F'O&^x¬J¢íz(¥„Ï²ÛÚRFÂì¿£æ\^Ó¶_bë-Ù³ŽYKTz¾ÍõçøÝú¦ÔÑž±·è;NT\ÍµËÝd¡…-3“˜Ê¨$£/79uÅçª-Fë+î™+â\AÀùWT%,¨ˆÜÄÿ,99>${þ²…hTÀ±øG2
+×7)—žº¦éˆšò2Ò&‡UŽ¤ñ4eÅù|’ñó…Ž2XZ—/;ô2ÑíŠÞJQêØV.+Uâ‚µEu†Gì	e	®R¢øWYaÂc!:Ñ^¥DTarâ+”1{[>6œÃŽ=7FI<0.3©“$ „˜NR}eÂYl«u¶JPµ«2½µ¥S¨ŽlOÎW/r–?>kR-|¸_"é\Ðz,¤x¬=`öñTÉa8èøçí¦(™áBJ|`A÷jë
+ˆVÆÃ€(É•QhãJ¼aj‚/L	Pt²#¤ñ’¤Ÿÿû’dî‹õ½l?)ébB     ²ò™€@  4€  Š6Ehá[YkõŽ†L†¦h`Ä@ð¨¨TF<ÈTÂ†•
+[Q¢¯™¡¢"%#"åÅFÙÆ‘"›`¸–%”" ÅÐÅ¢„b›!$Ä±ŠBHÊ š&^uš.4>ÃÄ«Ô¼¹Û/3VÕ¹Ü]
+¬´|O(ƒÌ/—tÍ!mJ‰ª4Ê.ÆÖ)œ^¸8K¥%DÊMÔî:„L…d%@:%]AJ³%;ö”ƒ±aÚð±²ŽQR*H °Ù—ÈO¹Ñ™:„*ôáÁShAù€I´bë™X»"¥	—>ª#Œ*g`EaþŒŒk&P‚"	bÜ*H„C&be·9jaâ ÁE¥#	’Á
+6M’È–iªmtíB&QyÀXH2Dö7ËÁæ?H1v7Î„Â[—)‚3Í7è£&DóC±hŒ ƒÁ8¼Z# °îX‰;S.´åË¾{ô‹åBØú$•ŽË†â*fØZcOZ¶W—!žÿû’dñöl»‰ŒKr     ©°êF=8H  4€  •˜}Û˜°dû‹Z¼Zâ£•§O¨¹àHé ôÅ4ª¢á”’~k2žšfI¢‹S*Pù*!Ê[R¼¶Vid‰¬±²QlÁáS‰V‘.Á6—@\L)8™I6(IH—aèY°ú%G¤¡Äj	e„'Ç)Ó¬ÛoZ¬µ/—¥þ¹zFzJ*ƒ¢t75-JÅàt¤ˆƒ	 š–‰ Q@DÐ^n“}k#‘”²ävYdr>_ù‘¨`¡A:äj(4r5k#—ÿÿü²_ö²:þdÊ(0Ž†L¡:b
+j)™qÉ½UUUUUUUUUUUUUUUUUUUUUULAME3.97UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUÿû’dñö/l:ìLò     ™¢¼Fz@  4€  UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUULAME3.97UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUÿû’dÿð  i          ¤      4€  UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU

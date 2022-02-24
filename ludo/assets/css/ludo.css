@@ -1,0 +1,297 @@
+* {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    outline: 0;
+    box-sizing: border-box;
+}
+
+.game {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 20px auto;
+    position: relative;
+    width: 600px;
+    height: 600px;
+    border: 1px solid black;
+}
+
+.green {
+    background-color: #66bb6a;
+}
+
+.red {
+    background-color: #e53935;
+    border: none;
+}
+
+.yellow {
+    background-color: #fff176;
+    border: none;
+}
+
+.blue {
+    background-color: #29b6f6;
+    border: none;
+}
+
+.house {
+    display: inline-block;
+    position: absolute;
+    width: 40%;
+    height: 40%;
+    padding: 7%;
+}
+
+.box {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    padding: 20%;
+}
+
+.square {
+    position: absolute;
+    width: 25%;
+    height: 25%;
+}
+
+.square-one {
+    top: 20%;
+    left: 20%;
+}
+
+.square-two {
+    top: 20%;
+    right: 20%;
+}
+
+.square-three {
+    bottom: 20%;
+    left: 20%;
+}
+
+.square-four {
+    bottom: 20%;
+    right: 20%;
+}
+
+.home {
+    position: absolute;
+    top: 40%;
+    left: 40%;
+    width: 20%;
+    height: 20%;
+    /*border-bottom: 50px solid #e53935;
+    border-top: 50px solid #fff176;
+    border-left: 50px solid #66bb6a;
+    border-right: 50px solid #29b6f6;
+    */
+    background-image: url('../images/home.png');
+    background-size: contain;
+}
+
+.cells {
+    position: absolute;
+    width: 6.66%;
+    height: 6.66%;
+    border-collapse: collapse;
+    border: 1px solid #e5e5e569;
+}
+
+.safe {
+    background-color: #99999938;
+    background-image: url('../images/star.png');
+    background-size: contain;
+}
+
+.g-start {
+    background-color: #66bb6a;
+}
+
+.y-start {
+    background-color: #fff176;
+}
+
+.r-start {
+    background-color: #e53935;
+}
+
+.b-start {
+    background-color: #29b6f6;
+}
+
+.green-pointer {
+    background-image: url('../images/pg.png');
+}
+
+.blue-pointer {
+    background-image: url('../images/pb.png');
+}
+
+.yellow-pointer {
+    background-image: url('../images/py.png');
+}
+
+.red-pointer {
+    background-image: url('../images/pr.png');
+}
+
+.pointers {
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 50%;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.blink-cell {
+    animation: blink 0.2s infinite;
+}
+
+@keyframes blink {
+    100% {
+        background-color: rgba(173, 166, 166, 0.596);
+    }
+}
+
+.green-dice-area {
+    position: absolute;
+    top: 2%;
+    left: 2%;
+    width: 25%;
+    height: 25%;
+    z-index: 1;
+}
+
+.yellow-dice-area {
+    position: absolute;
+    top: 2%;
+    right: 2%;
+    width: 25%;
+    height: 25%;
+    z-index: 1;
+}
+
+.blue-dice-area {
+    position: absolute;
+    bottom: 2%;
+    right: 2%;
+    width: 25%;
+    height: 25%;
+    z-index: 1;
+}
+
+.red-dice-area {
+    position: absolute;
+    bottom: 2%;
+    left: 2%;
+    width: 25%;
+    height: 25%;
+    z-index: 1;
+}
+
+.default-dice {
+    background-image: url('../images/d0.png');
+    background-size: contain;
+    height: 100%;
+    cursor: pointer;
+}
+
+.rolling-dice {
+    background-image: url('../images/dice.gif');
+    background-size: contain;
+    height: 100%;
+}
+
+.number-dice {
+    background-size: contain;
+    height: 100%;
+    cursor: pointer;
+}
+
+.number-dice-1 {
+    background-image: url('../images/d1.png');
+}
+
+.number-dice-2 {
+    background-image: url('../images/d2.png');
+}
+
+.number-dice-3 {
+    background-image: url('../images/d3.png');
+}
+
+.number-dice-4 {
+    background-image: url('../images/d4.png');
+}
+
+.number-dice-5 {
+    background-image: url('../images/d5.png');
+}
+
+.number-dice-6 {
+    background-image: url('../images/d6.png');
+}
+
+.multiple-pointers {
+    position: absolute;
+    top: 10%;
+    left: 0px;
+    height: 80%;
+    width: 80%;
+}
+
+.end-cell {
+    position: absolute;
+    width: 6.66%;
+    height: 6.66%;
+}
+
+.end-cell-has-2-items div {
+    position: absolute;
+    top: 10%;
+    height: 80%;
+    width: 80%;
+}
+
+.end-cell-has-2-items div:nth-child(2) {
+    margin-left: 20%;
+}
+
+.end-cell-has-3-items div {
+    position: absolute;
+    top: 10%;
+    height: 80%;
+    width: 80%;
+}
+
+.end-cell-has-3-items div:nth-child(2) {
+    margin-left: 10%;
+}
+
+.end-cell-has-3-items div:nth-child(3) {
+    margin-left: 20%;
+}
+
+.end-cell-has-4-items div {
+    position: absolute;
+    top: 10%;
+    left: 0%;
+    height: 80%;
+    width: 80%;
+}
+
+.end-cell-has-4-items div:nth-child(2) {
+    margin-left: 10%;
+}
+
+.end-cell-has-4-items div:nth-child(3) {
+    margin-left: 20%;
+}
+
+.end-cell-has-4-items div:nth-child(4) {
+    margin-left: 30%;
+}

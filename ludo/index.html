@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnlineLudo</title>
+    <link rel="icon" href="assets/images/d0.png" type="image/gif" sizes="16x16">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+
+<body class="bg-dark">
+    <p class="mt-5"></p>
+
+    <div class="d-flex align-items-center flex-column justify-content-center h-100 bg-dark text-white">
+        <center><span class="h4 mt-2">Welcome to Onlineludo</span></center>
+        <form class="w-25 mt-2" action="ludo.html" method="get">
+            <div class="form-group">
+                <select id="numberPlayer" name="players" class="form-control w-100">
+                    <option value="2">2 Player Ludo</option>
+                    <option value="3">3 Player Ludo</option>
+                    <option value="4" selected>4 Player Ludo</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="strtLudoBtn" class="btn btn-outline-secondary w-100">Start Ludo</button>
+            </div>
+        </form>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#strtLudoBtn").click(function() {
+                console.log("hello.");
+                let numberPlayer = $("#numberPlayer").val();
+                console.log(numberPlayer);
+            })
+        });
+    </script>
+</body>
+
+</html>
